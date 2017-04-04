@@ -8,6 +8,29 @@ from lsst.pipe.tasks.ingestCalibs import CalibsParseTask
 
 EXTENSIONS = ["fits", "gz", "fz"]  # Filename extensions to strip off
 
+def mjdToVisit(date_obs):
+        """Return the visit number given a DATE-OBS string
+        """
+        # We see corrupted dates like "2016-03-06T08:53:3.198" (should be 53:03.198); fix them
+        # when they make dafBase.DateTime unhappy
+
+        try:
+            dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
+        except:
+            year, month, day, h, m, s = re.split(r"[-:T]", date_obs)
+            if re.search(r"[A-Z]$", s):
+                s, TZ = s[:-1], s[-1]
+            else:
+                TZ = ""
+
+            date_obs = "%4d-%02d-%02dT%02d:%02d:%06.3f%s" % (int(year), int(month), int(day),
+                                                             int(h),    int(m),     float(s), TZ)
+            dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
+
+        mjd = dt.get(dafBase.DateTime.MJD) # MJD is actually the default
+
+        mmjd = mjd - 55197              # relative to 2010-01-01, just to make the visits a tiny bit smaller
+        return int(1e5*mmjd)            # 86400s per day, so we need this resolution
 
 class Ctio0m9ParseTask(ParseTask):
     """Parser suitable for ctio0m9 data
@@ -33,11 +56,7 @@ class Ctio0m9ParseTask(ParseTask):
     def translate_visit(self, md):
         """Generate a unique visit from the timestamp
         """
-        dt = dafBase.DateTime(md.get("DATE-OBS"), dafBase.DateTime.TAI)
-        mjd = dt.get(dafBase.DateTime.MJD) # MJD is actually the default
-
-        mmjd = mjd - 55197              # relative to 2010-01-01, just to make the visits a tiny bit smaller
-        return int(1e5*mmjd)            # 86400s per day, so we need this resolution
+        return mjdToVisit(md.get("DATE-OBS"))
 
 ##############################################################################################################
 

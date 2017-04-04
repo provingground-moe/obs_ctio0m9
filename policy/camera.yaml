@@ -1,0 +1,136 @@
+#
+# LSST Data Management System
+# Copyright 2017 LSST Corporation.
+#
+# This product includes software developed by the
+# LSST Project (http://www.lsst.org/).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
+# see <http://www.lsstcorp.org/LegalNotices/>.
+#
+#
+--- # ctio0m9
+
+name : "ctio0m9"
+plateScale : 13.55                      # plate scale, in arcseconds on sky/mm
+radialCoeffs : [0.0, 1.0, 0.0, 1.0]     # radial distortion coefficients (c_0 + c_1 r + c_2 r^2 + ...)
+
+#
+# A single amplifier ("segment" to the camera team)
+#
+#             (u'ASEC11', u'[1:1084,1:1024]'),
+#             (u'BSEC11', u'[1045:1084,1:1024]'),
+#             (u'CSEC11', u'[1:1034,1:1024]'),
+#             (u'DSEC11', u'[1:1034,1:1024]'),
+#             (u'TSEC11', u'[11:1034,1:1024]'),
+#             (u'ABSEC11', u'[1045:1084,1:1024]'),
+#             (u'ADSEC11', u'[1:1024,1:1024]'),
+#             (u'ASEC12', u'[1085:2168,1:1024]'),
+#             (u'BSEC12', u'[1085:1124,1:1024]'),
+#             (u'CSEC12', u'[1035:2068,1:1024]'),
+#             (u'DSEC12', u'[1135:2168,1:1024]'),
+#             (u'TSEC12', u'[1135:2158,1:1024]'),
+#             (u'ABSEC12', u'[1:40,1:1024]'),
+#             (u'ADSEC12', u'[1025:2048,1:1024]'),
+#             (u'ASEC21', u'[1:1084,1025:2048]'),
+#             (u'BSEC21', u'[1045:1084,1025:2048]'),
+#             (u'CSEC21', u'[1:1034,1025:2048]'),
+#             (u'DSEC21', u'[1:1034,1025:2048]'),
+#             (u'TSEC21', u'[11:1034,1025:2048]'),
+#             (u'ABSEC21', u'[1045:1084,1:1024]'),
+#             (u'ADSEC21', u'[1:1024,1025:2048]'),
+#             (u'ASEC22', u'[1085:2168,1025:2048]'),
+#             (u'BSEC22', u'[1085:1124,1025:2048]'),
+#             (u'CSEC22', u'[1035:2068,1025:2048]'),
+#             (u'DSEC22', u'[1135:2168,1025:2048]'),
+#             (u'TSEC22', u'[1135:2158,1025:2048]'),
+#             (u'ABSEC22', u'[1:40,1:1024]'),
+#             (u'ADSEC22', u'[1025:2048,1025:2048]'),
+
+
+AMP : &AMP                              # Site 2K; 4 working amplifiers
+    # trimmed
+    hdu : 1                             # Only one HDU in the file
+
+    flipXY :     [False, False]
+    perAmpData : False                  # is the amp data split across multiple HDUs/Files
+
+    #                         [[x0,  y0], [xSize, ySize]]
+    rawBBox                 : [[0,    0], [1084,  1024]]  # total size of one amp's raw data
+    
+    rawDataBBox             : [[10,   0], [1024,   1024]] # data region in raw data
+    rawSerialPrescanBBox    : [[0,    0], [10,     1024]] # serial prescan (often == extended)
+    rawSerialOverscanBBox   : [[1034, 0], [50,     1024]] # serial overscan
+    rawParallelPrescanBBox  : [[0,    1], [0,      0]]    # pixels digitised before first parallel transfer
+    rawParallelOverscanBBox : [[0, 1023], [0,      0]]    # parallel overscan
+
+    saturation : 65535                  # saturation level, DN XXX Should this be in electrons?
+
+    # Linearity correction is still under discussion, so this is a placeholder.
+    linearityType : PROPORTIONAL
+    linearityThreshold : 0
+    linearityMax : 65535                # == saturation
+    linearityCoeffs : [0, 65535]        # == [linearityThreshold, linearityMax]
+
+#
+# Define our specific devices
+#
+# All the CCDs present in this file
+#
+CCDs :
+   "SITE2K":
+      detectorType : 0
+
+      id : 0
+      serial : Tek2K_3
+      refpos : [1023.5, 1023.5]           # reference position of CCD in pixels
+      offset : [0, 0]                     # offset of reference pixel in camera
+
+      # This is the orientation we need to put the serial direction along the x-axis
+      bbox : [[0, 0], [2048, 2048]]
+      pixelSize : [0.024, 0.024]          # in mm (0.384 arcsec)
+      transformDict : {nativeSys : 'Pixels', transforms : None}
+      transposeDetector : False
+      pitch : 0.0                         # (degrees)
+      yaw : 0.0                           # rotation in plane of camera (degrees)
+      roll : 0.0                          # (degrees)
+
+      amplifiers:
+           "11": &A11
+             <<: *AMP
+             ixy : [0, 0]
+             readCorner : LL
+             gain : 3.11
+             readNoise : 12.0
+           "12":
+             <<: *A11
+             ixy : [0, 1]
+             readCorner : UL
+             gain : 3.12
+             readNoise : 6.66
+           "21": &A21
+             <<: *AMP
+             ixy : [1, 0]
+             readCorner : LR
+             rawDataBBox             : [[50, 0],   [1024, 1024]]
+             rawSerialPrescanBBox    : [[0, 1084], [10,   1024]]
+             rawSerialOverscanBBox   : [[0, 0],    [50,   1024]]
+             gain : 3.21
+             readNoise : 12.0
+           "22":
+             <<: *A21
+             readCorner : UR
+             ixy : [1, 1]
+             gain : 3.22
+             readNoise : 12.0

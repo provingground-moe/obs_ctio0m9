@@ -59,7 +59,7 @@ class Ctio0m9Mapper(CameraMapper):
 
         CameraMapper.__init__(self, policy, policyFile.getRepositoryPath(), **kwargs)
 
-        afwImageUtils.defineFilter('NONE', 0.0, alias=['no_filter', "OPEN"])
+        afwImageUtils.defineFilter('NONE', 0.0, alias=['no_filter', "OPEN", "clear"])
         afwImageUtils.defineFilter('Ronchi', 0.0, alias=[])
 
     def _makeCamera(self, policy, repositoryDir):

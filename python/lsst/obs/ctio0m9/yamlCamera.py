@@ -153,18 +153,9 @@ class YamlCamera(cameraGeom.Camera):
             rawParallelOverscanBBox = self._makeBBoxFromList(amp['rawParallelOverscanBBox'])
             rawParallelOverscanBBox.shift(afwGeom.ExtentI(x0, y0))
             record.setRawVerticalOverscanBBox(rawParallelOverscanBBox)
-            #
-            # the "rawPrescanBBox" is interpreted by the isrTask as the region to use
-            # to estimate the bias, not the region of the data corresponding to the
-            # extended register and other serial prescan.
-            #
-            # Until this is fixed in ISR we need to set this to an empty BBox
-            if False:
-                rawSerialPrescanBBox = self._makeBBoxFromList(amp['rawSerialPrescanBBox'])
-                rawSerialPrescanBBox.shift(afwGeom.ExtentI(x0, y0))
-            else:
-                rawSerialPrescanBBox = self._makeBBoxFromList([[0, 0], [0, 0]])
 
+            rawSerialPrescanBBox = self._makeBBoxFromList(amp['rawSerialPrescanBBox'])
+            rawSerialPrescanBBox.shift(afwGeom.ExtentI(x0, y0))
             record.setRawPrescanBBox(rawSerialPrescanBBox)
 
             if perAmpData:

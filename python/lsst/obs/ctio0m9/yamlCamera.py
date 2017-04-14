@@ -167,7 +167,10 @@ class YamlCamera(cameraGeom.Camera):
 
             record.setRawPrescanBBox(rawSerialPrescanBBox)
 
-            record.setRawXYOffset(afwGeom.Extent2I(ix*xRawExtent, iy*yRawExtent))
+            if perAmpData:
+                record.setRawXYOffset(afwGeom.Extent2I(ix*xRawExtent, iy*yRawExtent))
+            else:
+                record.setRawXYOffset(afwGeom.Extent2I(0, 0))
 
             record.setReadoutCorner(readCorners[amp['readCorner']])
             record.setGain(amp['gain'])

@@ -19,15 +19,16 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
+__all__ = ["Ctio0m9Mapper"]
+
+import re
 import lsst.afw.image.utils as afwImageUtils
 import lsst.afw.geom as afwGeom
-#import lsst.afw.image as afwImage
+import lsst.afw.cameraGeom as cameraGeom
 from lsst.obs.base import CameraMapper, MakeRawVisitInfo
 import lsst.pex.policy as pexPolicy
 
 from lsst.obs.ctio0m9 import Ctio0m9
-
-__all__ = ["Ctio0m9Mapper"]
 
 class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
     """functor to make a VisitInfo from the FITS header of a raw image
@@ -48,6 +49,20 @@ class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
         """
         dateObs = self.popIsoDate(md, "DATE-OBS")
         return self.offsetDate(dateObs, 0.5*exposureTime)
+
+def bboxFromIraf(irafBBoxStr):
+    """Split an IRAF-style BBOX (used e.g. for DETSEC), returning a Box2I
+
+    [x0:x1,y0:y1] where x0 and x1 are the one-indexed start and end columns, and correspondingly
+    y0 and y1 are the start and end rows.
+    """
+
+    mat = re.search(r"^\[([-\d]+):([-\d]+),([-\d]+):([-\d]+)\]$", irafBBoxStr)
+    if not mat:
+        raise RuntimeError("Unable to parse IRAF-style bbox \"%s\"" % irafBBoxStr)
+    x0, x1, y0, y1 = [int(_) for _ in mat.groups()]
+    
+    return afwGeom.BoxI(afwGeom.PointI(x0 - 1, y0 - 1), afwGeom.PointI(x1 - 1, y1 - 1))
 
 class Ctio0m9Mapper(CameraMapper):
     packageName = 'obs_ctio0m9'
@@ -77,3 +92,63 @@ class Ctio0m9Mapper(CameraMapper):
         """
         visit = dataId['visit']
         return int(visit)
+
+    def std_raw(self, item, dataId):
+        item = super(Ctio0m9Mapper, self).std_raw(item, dataId)
+
+        md = item.getMetadata()
+        #
+        # We may need to hack up the cameraGeom
+        #
+        # There doesn't seem to be a way to get the extended register, so I don't update it.
+        # We could do this by detecting extra overscan and adjusting things cleverly; probably
+        # we need to so so.
+        #
+        ccd = item.getDetector()
+        rawBBoxFromMetadata = bboxFromIraf(md.get("ASEC11"))
+        rawBBox = ccd[0].getRawBBox()
+
+        if rawBBoxFromMetadata != rawBBox:
+            extraSerialOverscan = rawBBoxFromMetadata.getWidth() - rawBBox.getWidth() # extra overscan pixels
+            extraParallelOverscan = rawBBoxFromMetadata.getHeight() - rawBBox.getHeight() # vertical
+
+            ccd = cameraGeom.copyDetector(ccd, ampInfoCatalog=ccd.getAmpInfoCatalog().copy(deep=True))
+            item.setDetector(ccd)
+
+            for a in ccd:
+                ix, iy = [int(_) for _ in a.getName()]
+                irafName = "%d%d" % (iy, ix)
+                a.setRawBBox(bboxFromIraf(md.get("ASEC%s" % irafName)))
+                a.setRawDataBBox(bboxFromIraf(md.get("TSEC%s" % irafName)))
+
+                if extraSerialOverscan != 0 or extraParallelOverscan != 0:
+                    #
+                    # the number of overscan pixels has been changed from camera.yaml
+                    #
+                    # First adjust the overscan
+                    #
+                    rawHorizontalOverscanBBox = a.getRawHorizontalOverscanBBox()
+
+                    rawHorizontalOverscanBBox.shift(afwGeom.ExtentI((ix - 1)*extraSerialOverscan,
+                                                                    (iy - 1)*extraParallelOverscan))
+
+                    xy0 = rawHorizontalOverscanBBox.getMin()
+                    xy1 = rawHorizontalOverscanBBox.getMax()
+
+                    xy1.shift(afwGeom.ExtentI(extraSerialOverscan, extraParallelOverscan))
+
+                    a.setRawHorizontalOverscanBBox(afwGeom.BoxI(xy0, xy1))
+                    #
+                    # And now move the extended register to allow for the extra overscan pixels
+                    #
+                    rawPrescanBBox = a.getRawPrescanBBox()
+                    rawPrescanBBox.shift(afwGeom.ExtentI(2*(ix - 1)*extraSerialOverscan,
+                                                           (iy - 1)*extraParallelOverscan))
+                    
+                    xy0 = rawPrescanBBox.getMin()
+                    xy1 = rawPrescanBBox.getMax()
+
+                    xy1.shift(afwGeom.ExtentI(0, extraParallelOverscan))
+                    a.setRawPrescanBBox(afwGeom.BoxI(xy0, xy1))
+
+        return item

@@ -58,6 +58,43 @@ class Ctio0m9ParseTask(ParseTask):
         """
         return mjdToVisit(md.get("DATE-OBS"))
 
+    def translate_imgType(self, md):
+        """Determine the type of image being taken (bias, dark etc).
+
+        Get the image type (e.g. bias, dark, flat etc) from the metadata (md).
+        Translator function derived from a very small dataset from the observatory
+        i.e. may well need adding to when new string values are found
+        """
+        val = md.get("IMAGETYP").rstrip().lstrip()
+        conversion = {'dflat': 'flat', 'DOME FLAT': 'flat',
+                      'zero': 'bias',
+                      'object': 'object'}
+        if val in conversion:
+            return conversion[val]
+        else:
+            self.log.warn('Unknown image type %s found in IMAGETYP key', val)
+            return None
+
+    def translate_wavelength(self, md):
+        """Get the illumination wavelength.
+
+        Get the monochromator wavelength from the header, for flats only.
+        Method will need ammending if/when this value is written elsewhere
+        """
+        val = md.get("OBJECT").rstrip().lstrip()
+        if self.translate_imgType(md) != 'flat':
+            return float('nan') # defaults to NaN if not a flat
+        if val[0:4].isdigit():
+            wavelength = float(val[0:4])
+        elif val[0:3].isdigit():
+            wavelength = float(val[0:3])
+            if wavelength<300 or wavelength>1150: #We don't know what might be stored here,
+                                                  #so a little sanity checking is good
+                self.log.warn('Found a wavelength of %s, '
+                              'which lies outside of the expected range.', wavelength)
+            return wavelength
+        return float('nan')
+
 ##############################################################################################################
 
 class Ctio0m9CalibsParseTask(CalibsParseTask):

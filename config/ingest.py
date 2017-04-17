@@ -11,6 +11,8 @@ config.parse.translation = {
 }
 config.parse.translators = {
     'visit': 'translate_visit',
+    'imgType': 'translate_imgType',
+    'wavelength': 'translate_wavelength',
 }
 config.parse.defaults = {
     'object': "UNKNOWN",
@@ -23,7 +25,10 @@ config.register.columns = {
     'basename': 'text',
     'filter': 'text',
     'date': 'text',
+    'dateObs': 'text',
     'expTime': 'double',
     'object': 'text',
+    'imgType': 'text',
+    'wavelength': 'double',
 }
 config.register.visit = list(config.register.columns.keys())

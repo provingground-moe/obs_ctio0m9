@@ -27,6 +27,7 @@ import lsst.afw.geom as afwGeom
 import lsst.afw.cameraGeom as cameraGeom
 from lsst.obs.base import CameraMapper, MakeRawVisitInfo
 import lsst.pex.policy as pexPolicy
+import lsst.daf.base as dafBase
 
 from lsst.obs.ctio0m9 import Ctio0m9
 
@@ -93,6 +94,24 @@ class Ctio0m9Mapper(CameraMapper):
         """
         visit = dataId['visit']
         return int(visit)
+
+    def std_raw_md(self, md, dataId):
+        # We see corrupted dates like "2016-03-06T08:53:3.198" (should be 53:03.198); fix them
+        # when they make dafBase.DateTime unhappy
+        date_obs = md.get('DATE-OBS')
+        try: # see if compliant. Don't use, just a test with dafBase
+            dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
+        except: #if bad, sanitise
+            year, month, day, h, m, s = re.split(r"[-:T]", date_obs)
+            if re.search(r"[A-Z]$", s):
+                s, TZ = s[:-1], s[-1]
+            else:
+                TZ = ""
+
+            date_obs = "%4d-%02d-%02dT%02d:%02d:%06.3f%s" % (int(year), int(month), int(day),
+                                                             int(h),    int(m),     float(s), TZ)
+        md.set('DATE-OBS', date_obs) # put santized version back
+        return md
 
     def std_raw(self, item, dataId):
         item = super(Ctio0m9Mapper, self).std_raw(item, dataId)

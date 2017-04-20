@@ -41,9 +41,9 @@ class Ctio0m9ParseTask(ParseTask):
     def __init__(self, config, *args, **kwargs):
         super(ParseTask, self).__init__(config, *args, **kwargs)
 
-    def getInfo(self, filename):
+    def getInfo(self, filename, mapper=None):
         # Grab the basename
-        phuInfo, infoList = ParseTask.getInfo(self, filename)
+        phuInfo, infoList = ParseTask.getInfo(self, filename, mapper=mapper)
 
         pathname, basename = os.path.split(filename)
         basename = re.sub(r"\.(%s)$" % "|".join(EXTENSIONS), "", basename)

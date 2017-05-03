@@ -33,11 +33,12 @@ from lsst.obs.ctio0m9 import Ctio0m9
 class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
     """functor to make a VisitInfo from the FITS header of a raw image
     """
-
+    
     def setArgDict(self, md, argDict):
         """Fill an argument dict with arguments for makeVisitInfo and pop associated metadata
         """
         super(Ctio0m9MakeRawVisitInfo, self).setArgDict(md, argDict)
+        argDict["darkTime"] = md.get("DARKTIME")
 
     def getDateAvg(self, md, exposureTime):
         """Return date at the middle of the exposure

@@ -25,9 +25,8 @@ import re
 import lsst.afw.image.utils as afwImageUtils
 import lsst.afw.geom as afwGeom
 import lsst.afw.cameraGeom as cameraGeom
-from lsst.obs.base import CameraMapper, MakeRawVisitInfo
+from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf
 import lsst.pex.policy as pexPolicy
-
 from lsst.obs.ctio0m9 import Ctio0m9
 
 class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
@@ -50,19 +49,6 @@ class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
         dateObs = self.popIsoDate(md, "DATE-OBS")
         return self.offsetDate(dateObs, 0.5*exposureTime)
 
-def bboxFromIraf(irafBBoxStr):
-    """Split an IRAF-style BBOX (used e.g. for DETSEC), returning a Box2I
-
-    [x0:x1,y0:y1] where x0 and x1 are the one-indexed start and end columns, and correspondingly
-    y0 and y1 are the start and end rows.
-    """
-
-    mat = re.search(r"^\[([-\d]+):([-\d]+),([-\d]+):([-\d]+)\]$", irafBBoxStr)
-    if not mat:
-        raise RuntimeError("Unable to parse IRAF-style bbox \"%s\"" % irafBBoxStr)
-    x0, x1, y0, y1 = [int(_) for _ in mat.groups()]
-    
-    return afwGeom.BoxI(afwGeom.PointI(x0 - 1, y0 - 1), afwGeom.PointI(x1 - 1, y1 - 1))
 
 class Ctio0m9Mapper(CameraMapper):
     packageName = 'obs_ctio0m9'
@@ -144,7 +130,7 @@ class Ctio0m9Mapper(CameraMapper):
                     rawPrescanBBox = a.getRawPrescanBBox()
                     rawPrescanBBox.shift(afwGeom.ExtentI(2*(ix - 1)*extraSerialOverscan,
                                                            (iy - 1)*extraParallelOverscan))
-                    
+
                     xy0 = rawPrescanBBox.getMin()
                     xy1 = rawPrescanBBox.getMax()
 

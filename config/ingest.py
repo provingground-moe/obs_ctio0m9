@@ -5,7 +5,6 @@ config.parse.retarget(Ctio0m9ParseTask)
 config.parse.translation = {
     'expTime': 'EXPTIME',
     'object': 'OBJECT',
-    'filter': 'FILTER2',
     'date': 'DATE-OBS',
     'dateObs': 'DATE-OBS',
 }
@@ -13,6 +12,9 @@ config.parse.translators = {
     'visit': 'translate_visit',
     'imgType': 'translate_imgType',
     'wavelength': 'translate_wavelength',
+    'filter': 'translate_filter',
+    'filter1': 'translate_filter1',
+    'filter2': 'translate_filter2',
 }
 config.parse.defaults = {
     'object': "UNKNOWN",
@@ -24,6 +26,8 @@ config.register.columns = {
     'visit': 'int',
     'basename': 'text',
     'filter': 'text',
+    'filter1': 'text',
+    'filter2': 'text',
     'date': 'text',
     'dateObs': 'text',
     'expTime': 'double',

@@ -50,9 +50,17 @@ class Ctio0m9ParseTask(ParseTask):
         i.e. may well need adding to when new string values are found
         """
         val = md.get("IMAGETYP").rstrip().lstrip()
-        conversion = {'dflat': 'flat', 'DOME FLAT': 'flat',
+        conversion = {'dflat': 'flat',
+                      'DFLAT': 'flat',
+                      'DOME FLAT': 'flat',
+                      'dark': 'dark',
                       'zero': 'bias',
-                      'object': 'object'}
+                      'BIAS': 'bias',
+                      'Focus': 'focus',
+                      'FOCUS': 'focus',
+                      'sflat': 'flat',
+                      'object': 'object',
+                      'OBJECT': 'object'}
         if val in conversion:
             return conversion[val]
         else:
@@ -79,6 +87,75 @@ class Ctio0m9ParseTask(ParseTask):
             return wavelength
         return float('nan')
 
+    def _translate_filter(self, val):
+        conversion = {'SEMROCK': 'SEMROCK',
+                      'Semrock': 'SEMROCK',
+                      'RONCHI400': 'RONCHI400',
+                      'RONCHI200': 'RONCHI200',
+                      'ronchi': 'RONCHI200',
+                      'Ronchi': 'RONCHI200',
+                      'RONCHI': 'RONCHI200',
+                      'NONE': 'NONE',
+                      'no_filter': 'NONE',
+                      'OPEN': 'NONE',
+                      'CLEAR': 'NONE',
+                      'clear': 'NONE',
+                      'Clear': 'NONE',
+                      'OPEN5': 'NONE',
+                      'OPEN8': 'NONE',
+                      'dia': 'NONE',
+                      'FGB37': 'FGB37',
+                      'FGC715S': 'FGC715S',
+                      'u': 'u',
+                      'g': 'g',
+                      'r': 'r',
+                      'i': 'i',
+                      'z': 'z',
+                      'nv': 'nv',
+                      'b': 'b',
+                      }
+        if val in conversion:
+            return conversion[val]
+        else:
+            self.log.warn('Unmapped filter type %s found when translating filter', val)
+            return 'UNKNOWN_FILTER' #avoiding using None, as this is an alias for clear/no_filter
+
+
+    def translate_filter(self, md):
+        """Generate the standardised composite name of the two filters.
+
+        Map the filters used to a standard name, and concatenate as a string,
+        so that flats can be generated for each filter pair easily. Individual filter
+        name sanitisation is done by the _translate_filter() function so it only
+        has to be defined in one place.
+        """
+        filt1 = self._translate_filter(md.get("FILTER1").rstrip().lstrip())
+        filt2 = self._translate_filter(md.get("FILTER2").rstrip().lstrip())
+        sorted_filter = [filt1, filt2]
+        sorted_filter.sort() #we want to be insensitive to filter order, for now at least
+        filter_name = '+'.join(_ for _ in sorted_filter)
+        return filter_name
+
+    def translate_filter1(self, md):
+        """Standardise the filter naming.
+
+        Map the filter used to a standard name for the filter, as defined in the
+        _translate_filter() function.
+        """
+        val = md.get("FILTER1").rstrip().lstrip()
+        return self._translate_filter(val)
+
+    def translate_filter2(self, md):
+        """Standardise the filter naming.
+
+        Map the filter used to a standard name for the filter, as defined in the
+        _translate_filter() function.
+        """
+        val = md.get("FILTER2").rstrip().lstrip()
+        return self._translate_filter(val)
+
+
+
 ##############################################################################################################
 
 class Ctio0m9CalibsParseTask(CalibsParseTask):
@@ -91,7 +168,15 @@ class Ctio0m9CalibsParseTask(CalibsParseTask):
         return match.groups()[0]
 
     def translate_filter(self, md):
+        print('\nMerlin says there might be a problem here\nCheck what is happening when you see this\n')
+        #worried that this is not how this should be done
+        #should be fine as long as whatever uses this translated filter value respect filter aliases.
         return self._translateFromCalibId("filter", md)
 
     def translate_calibDate(self, md):
         return self._translateFromCalibId("calibDate", md)
+
+    def translate_ccd(self, md):
+      return 0
+
+

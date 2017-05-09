@@ -104,6 +104,14 @@ class Ctio0m9Mapper(CameraMapper):
         visit = dataId['visit']
         return int(visit)
 
+    def bypass_ccdExposureId(self, datasetType, pythonType, location, dataId):
+        """Hook to retrieve identifier for CCD"""
+        return self._computeCcdExposureId(dataId)
+
+    def bypass_ccdExposureId_bits(self, datasetType, pythonType, location, dataId):
+        """Hook to retrieve number of bits in identifier for CCD"""
+        return 32
+
     def std_raw_md(self, md, dataId):
         # We see corrupted dates like "2016-03-06T08:53:3.198" (should be 53:03.198); fix them
         # when they make dafBase.DateTime unhappy

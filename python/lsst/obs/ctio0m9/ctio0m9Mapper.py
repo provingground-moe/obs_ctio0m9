@@ -63,7 +63,7 @@ class Ctio0m9Mapper(CameraMapper):
         policy = pexPolicy.Policy(policyFile)
 
         CameraMapper.__init__(self, policy, policyFile.getRepositoryPath(), **kwargs)
-        filter_pairings = ['NONE+g',
+        filter_pairings = ['NONE+g', # list of all filter pairings found in data
                            'NONE+r',
                            'NONE+i',
                            'NONE+z',
@@ -72,23 +72,11 @@ class Ctio0m9Mapper(CameraMapper):
                            'NONE+RONCHI200',
                            'NONE+NONE']
 
+        # default no-filter name used for biases and darks - must appear
+        afwImageUtils.defineFilter('NONE', 0.0, alias=[])
+
         for pairing in filter_pairings:
             afwImageUtils.defineFilter(pairing, 0.0, alias=[])
-
-        # afwImageUtils.defineFilter("NONE", 0.0, alias=[])
-        # afwImageUtils.defineFilter('RONCHI200', 0.0, alias=[])
-        # afwImageUtils.defineFilter('RONCHI400', 0.0, alias=[])
-        # afwImageUtils.defineFilter('SEMROCK', 0.0, alias=[])
-        # afwImageUtils.defineFilter('FGB37', 0.0, alias=[])
-        # afwImageUtils.defineFilter('FGC715S', 0.0, alias=[])
-        # afwImageUtils.defineFilter('u', 0.0, alias=[])
-        # afwImageUtils.defineFilter('g', 0.0, alias=[])
-        # afwImageUtils.defineFilter('r', 0.0, alias=[])
-        # afwImageUtils.defineFilter('i', 0.0, alias=[])
-        # afwImageUtils.defineFilter('z', 0.0, alias=[])
-        # afwImageUtils.defineFilter('nv', 0.0, alias=[])
-        # afwImageUtils.defineFilter('b', 0.0, alias=[])
-
 
     def _makeCamera(self, policy, repositoryDir):
         """Make a camera (instance of lsst.afw.cameraGeom.Camera) describing the camera geometry

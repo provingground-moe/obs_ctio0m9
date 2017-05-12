@@ -22,10 +22,11 @@
 __all__ = ["Ctio0m9Mapper"]
 
 import re
+import lsst.afw.image as afwImage
 import lsst.afw.image.utils as afwImageUtils
 import lsst.afw.geom as afwGeom
 import lsst.afw.cameraGeom as cameraGeom
-from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf
+from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf, exposureFromImage
 import lsst.pex.policy as pexPolicy
 import lsst.daf.base as dafBase
 from lsst.obs.ctio0m9 import Ctio0m9
@@ -179,3 +180,11 @@ class Ctio0m9Mapper(CameraMapper):
                     a.setRawPrescanBBox(afwGeom.BoxI(xy0, xy1))
 
         return item
+
+    def std_dark(self, item, dataId):
+        # import ipdb; ipdb.set_trace()
+        exp = exposureFromImage(item)
+        if not exp.getInfo().hasVisitInfo():
+            # hard-coded, but pipe_drivers always(?) normalises darks to a darktime of 1s so this is OK?
+            exp.getInfo().setVisitInfo(afwImage.VisitInfo(darkTime=1.0))
+        return exp

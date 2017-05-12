@@ -39,6 +39,8 @@ class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
         """
         super(Ctio0m9MakeRawVisitInfo, self).setArgDict(md, argDict)
         argDict["darkTime"] = md.get("DARKTIME")
+        #The line above should maybe be moved to obs_base/makeRawVisitInfo.setArgDict() and read:
+        # argDict["darkTime"] = self.popFloat(md, "DARKTIME")
 
     def getDateAvg(self, md, exposureTime):
         """Return date at the middle of the exposure

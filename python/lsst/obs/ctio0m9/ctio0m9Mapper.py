@@ -71,6 +71,7 @@ class Ctio0m9Mapper(CameraMapper):
                            'NONE+SEMROCK',
                            'RONCHI200+SEMROCK',
                            'NONE+RONCHI200',
+                           'NONE+RONCHI400',
                            'NONE+NONE']
 
         # default no-filter name used for biases and darks - must appear

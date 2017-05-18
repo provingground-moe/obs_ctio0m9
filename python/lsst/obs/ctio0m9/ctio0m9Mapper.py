@@ -64,15 +64,20 @@ class Ctio0m9Mapper(CameraMapper):
         policy = pexPolicy.Policy(policyFile)
 
         CameraMapper.__init__(self, policy, policyFile.getRepositoryPath(), **kwargs)
-        filter_pairings = ['NONE+g', # list of all filter pairings found in data
+        filter_pairings = ['NONE+SEMROCK', # list of all filter pairings found in data
+                           'NONE+RONCHI200',
+                           'RONCHI200+SEMROCK',
+                           'NONE+NONE',
+                           'NONE+g',
                            'NONE+r',
                            'NONE+i',
                            'NONE+z',
-                           'NONE+SEMROCK',
-                           'RONCHI200+SEMROCK',
-                           'NONE+RONCHI200',
+                           'RONCHI200+z',
+                           'RONCHI200+g',
+                           'FGB37+RONCHI200',
                            'NONE+RONCHI400',
-                           'NONE+NONE']
+                           'FGC715S+RONCHI400',
+                           'FGC715S+RONCHI200']
 
         # default no-filter name used for biases and darks - must appear
         afwImageUtils.defineFilter('NONE', 0.0, alias=[])

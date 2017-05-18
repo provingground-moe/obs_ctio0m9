@@ -128,9 +128,20 @@ class Ctio0m9Mapper(CameraMapper):
         return md
 
     def std_raw(self, item, dataId):
-        item = super(Ctio0m9Mapper, self).std_raw(item, dataId)
-
         md = item.getMetadata()
+        
+        md.set('CTYPE1', 'RA---TAN')
+        md.set('CTYPE2', 'DEC--TAN')
+        md.set('CRVAL1', 35.666742048)
+        md.set('CRVAL2', -51.0818625561)
+        md.set('CRPIX1', 1582.28885549)
+        md.set('CRPIX2', 1018.84252704)
+        md.set('CD1_1', -0.000111557869436)
+        md.set('CD1_2', 1.09444409144E-07)
+        md.set('CD2_1', 6.26180926869E-09)
+        md.set('CD2_2', -0.000111259259893) 
+
+        item = super(Ctio0m9Mapper, self).std_raw(item, dataId)
         #
         # We may need to hack up the cameraGeom
         #

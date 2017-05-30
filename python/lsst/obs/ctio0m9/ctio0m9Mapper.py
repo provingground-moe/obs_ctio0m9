@@ -30,6 +30,7 @@ from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf, exposure
 import lsst.pex.policy as pexPolicy
 import lsst.daf.base as dafBase
 from lsst.obs.ctio0m9 import Ctio0m9
+from lsst.utils import decStrToDeg, raStrToDeg
 
 class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
     """functor to make a VisitInfo from the FITS header of a raw image
@@ -129,13 +130,14 @@ class Ctio0m9Mapper(CameraMapper):
         """
         md = item.getMetadata()
         
-        md.set('CTYPE1', 'RA---TAN')
-        md.set('CTYPE2', 'DEC--TAN')
-        md.set('CRVAL1', 35.666742048)
-        md.set('CRVAL2', -51.0818625561)
-        md.set('CRPIX1', 1582.28885549)
-        md.set('CRPIX2', 1018.84252704)
-        md.set('CD1_1', -0.000111557869436)
+        # Note that setting these must be done before the call to super below
+        md.set('CTYPE1', 'RA---TAN') # add missing keywords
+        md.set('CTYPE2', 'DEC--TAN') # add missing keywords
+        md.set('CRVAL2', decStrToDeg(md.get('DEC'))) # translate RA/DEC from header
+        md.set('CRVAL1', raStrToDeg(md.get('RA')))
+        md.set('CRPIX1', 210.216) # set reference pixels
+        md.set('CRPIX2', 344.751)
+        md.set('CD1_1', -0.000111557869436) # set nominal CD matrix
         md.set('CD1_2', 1.09444409144E-07)
         md.set('CD2_1', 6.26180926869E-09)
         md.set('CD2_2', -0.000111259259893) 

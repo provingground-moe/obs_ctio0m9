@@ -329,5 +329,3 @@
 --id visit=251908251
 --id visit=251908531
 --id visit=251908910
-# --id visit=253901028 #seems to be a flat
-# --id visit=253901297 #seems to be a flat

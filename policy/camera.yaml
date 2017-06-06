@@ -75,7 +75,7 @@ AMP : &AMP                              # Site 2K; 4 working amplifiers
     rawParallelPrescanBBox  : [[0,    1], [0,      0]]    # pixels digitised before first parallel transfer
     rawParallelOverscanBBox : [[0, 1023], [0,      0]]    # parallel overscan
 
-    saturation : 65535                  # saturation level, DN XXX Should this be in electrons?
+    saturation : 30000                  # saturation level, DN XXX Should this be in electrons?
 
     # Linearity correction is still under discussion, so this is a placeholder.
     linearityType : PROPORTIONAL

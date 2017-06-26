@@ -1,5 +1,5 @@
-from lsst.obs.monocam.ingest import MonocamCalibsParseTask
-config.parse.retarget(MonocamCalibsParseTask)
+from lsst.obs.ctio0m9.ingest import Ctio0m9CalibsParseTask
+config.parse.retarget(Ctio0m9CalibsParseTask)
 
 config.register.columns = {'filter': 'text',
                            'ccd': 'int',

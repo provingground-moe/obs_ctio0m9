@@ -22,11 +22,13 @@
 __all__ = ["Ctio0m9Mapper"]
 
 import re
+import lsst.afw.image as afwImage
 import lsst.afw.image.utils as afwImageUtils
 import lsst.afw.geom as afwGeom
 import lsst.afw.cameraGeom as cameraGeom
-from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf
+from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf, exposureFromImage
 import lsst.pex.policy as pexPolicy
+import lsst.daf.base as dafBase
 from lsst.obs.ctio0m9 import Ctio0m9
 
 class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
@@ -35,8 +37,12 @@ class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
 
     def setArgDict(self, md, argDict):
         """Fill an argument dict with arguments for makeVisitInfo and pop associated metadata
+        
+        @param[in] md image metadata
+        @param[in, out] md the argument dictionary for modification
         """
         super(Ctio0m9MakeRawVisitInfo, self).setArgDict(md, argDict)
+        argDict["darkTime"] = md.get("DARKTIME")
 
     def getDateAvg(self, md, exposureTime):
         """Return date at the middle of the exposure
@@ -51,6 +57,8 @@ class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
 
 
 class Ctio0m9Mapper(CameraMapper):
+    """Mapper class for the 0.9m telescope at CTIO
+    """
     packageName = 'obs_ctio0m9'
     MakeRawVisitInfoClass = Ctio0m9MakeRawVisitInfo
 
@@ -59,9 +67,26 @@ class Ctio0m9Mapper(CameraMapper):
         policy = pexPolicy.Policy(policyFile)
 
         CameraMapper.__init__(self, policy, policyFile.getRepositoryPath(), **kwargs)
+        filter_pairings = ['NONE+SEMROCK', # list of all filter pairings found in data
+                           'NONE+RONCHI200',
+                           'RONCHI200+SEMROCK',
+                           'NONE+NONE',
+                           'NONE+g',
+                           'NONE+r',
+                           'NONE+i',
+                           'NONE+z',
+                           'RONCHI200+z',
+                           'RONCHI200+g',
+                           'FGB37+RONCHI200',
+                           'NONE+RONCHI400',
+                           'FGC715S+RONCHI400',
+                           'FGC715S+RONCHI200']
 
-        afwImageUtils.defineFilter('NONE', 0.0, alias=['no_filter', "OPEN", "clear"])
-        afwImageUtils.defineFilter('Ronchi', 0.0, alias=[])
+        # default no-filter name used for biases and darks - must appear
+        afwImageUtils.defineFilter('NONE', 0.0, alias=[])
+
+        for pairing in filter_pairings:
+            afwImageUtils.defineFilter(pairing, 0.0, alias=[])
 
     def _makeCamera(self, policy, repositoryDir):
         """Make a camera (instance of lsst.afw.cameraGeom.Camera) describing the camera geometry
@@ -79,10 +104,43 @@ class Ctio0m9Mapper(CameraMapper):
         visit = dataId['visit']
         return int(visit)
 
-    def std_raw(self, item, dataId):
-        item = super(Ctio0m9Mapper, self).std_raw(item, dataId)
+    def bypass_ccdExposureId(self, datasetType, pythonType, location, dataId):
+        """Hook to retrieve identifier for CCD"""
+        return self._computeCcdExposureId(dataId)
 
+    def bypass_ccdExposureId_bits(self, datasetType, pythonType, location, dataId):
+        """Hook to retrieve number of bits in identifier for CCD"""
+        return 32
+
+    def std_raw_md(self, md, dataId):
+        """Method for performing any necessary sanitization of metadata.
+
+        @param[in,out] md metadata, as an lsst.daf.base.PropertyList or PropertySet, to be sanitized
+        @param[in] dataId unused
+        """
+        md = sanitize_date(md)
+        return md
+
+    def std_raw(self, item, dataId):
+        """Method for performing any necessary manipulation of the raw files.
+
+        @param[in,out] item afwImage exposure object with associated metadata and detector info
+        @param[in] dataId
+        """
         md = item.getMetadata()
+        
+        md.set('CTYPE1', 'RA---TAN')
+        md.set('CTYPE2', 'DEC--TAN')
+        md.set('CRVAL1', 35.666742048)
+        md.set('CRVAL2', -51.0818625561)
+        md.set('CRPIX1', 1582.28885549)
+        md.set('CRPIX2', 1018.84252704)
+        md.set('CD1_1', -0.000111557869436)
+        md.set('CD1_2', 1.09444409144E-07)
+        md.set('CD2_1', 6.26180926869E-09)
+        md.set('CD2_2', -0.000111259259893) 
+
+        item = super(Ctio0m9Mapper, self).std_raw(item, dataId)
         #
         # We may need to hack up the cameraGeom
         #
@@ -138,3 +196,39 @@ class Ctio0m9Mapper(CameraMapper):
                     a.setRawPrescanBBox(afwGeom.BoxI(xy0, xy1))
 
         return item
+
+    def std_dark(self, item, dataId):
+        """Standardiation of master dark frame. Must only be called on master darks.
+
+        @param[in,out] item the master dark, as an image-like object
+        @param[in] dataId unused
+        """
+        exp = exposureFromImage(item)
+        if not exp.getInfo().hasVisitInfo():
+            # hard-coded, but pipe_drivers always(?) normalises darks to a darktime of 1s so this is OK?
+            exp.getInfo().setVisitInfo(afwImage.VisitInfo(darkTime=1.0))
+        return exp
+
+def sanitize_date(md):
+    '''Take a metadata object, fix corrupted dates in DATE-OBS field, and return the fixed md object.
+    
+    We see corrupted dates like "2016-03-06T08:53:3.198" (should be 53:03.198); fix these
+    when they make dafBase.DateTime unhappy
+
+    @param md      metadata in, to be fixed
+    @return md     metadata returned, with DATE-OBS fixed
+    '''
+    date_obs = md.get('DATE-OBS')
+    try: # see if compliant. Don't use, just a test with dafBase
+        dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
+    except: #if bad, sanitise
+        year, month, day, h, m, s = re.split(r"[-:T]", date_obs)
+        if re.search(r"[A-Z]$", s):
+            s, TZ = s[:-1], s[-1]
+        else:
+            TZ = ""
+
+        date_obs = "%4d-%02d-%02dT%02d:%02d:%06.3f%s" % (int(year), int(month), int(day),
+                                                         int(h),    int(m),     float(s), TZ)
+    md.set('DATE-OBS', date_obs) # put santized version back
+    return md

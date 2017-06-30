@@ -50,8 +50,8 @@ config.calibrate.photoCal.matcher.retarget(MatchPessimisticBTask)
 # improve threshold values for short exposures on a small telescope
 config.charImage.detection.includeThresholdMultiplier=5.0 #default=10.0
 config.charImage.measurePsf.starSelector['objectSize'].fluxMin=1000.0 # default=12500.0
-config.calibrate.astrometry.matcher.sourceSelector['matcher'].minSnr=4.0 # default=40.0
-config.calibrate.photoCal.matcher.sourceSelector['matcher'].minSnr=4.0 # default=40.0
+config.calibrate.astrometry.matcher.sourceSelector['matcherPessimistic'].minSnr=4.0 # default=40.0
+config.calibrate.photoCal.matcher.sourceSelector['matcherPessimistic'].minSnr=4.0 # default=40.0
 
 # probably don't need these, was to check that no sources were being thrown away due to these
 # TODO: remove these options and rerun all to check if everything still works.

@@ -23,7 +23,7 @@
 --- # ctio0m9
 
 name : "ctio0m9"
-plateScale : 13.55                      # plate scale, in arcseconds on sky/mm
+plateScale : 16.0                      # plate scale, in arcseconds on sky/mm
 radialCoeffs : [0.0, 1.0, 0.0, 1.0]     # radial distortion coefficients (c_0 + c_1 r + c_2 r^2 + ...)
 
 #
@@ -75,7 +75,7 @@ AMP : &AMP                              # Site 2K; 4 working amplifiers
     rawParallelPrescanBBox  : [[0,    1], [0,      0]]    # pixels digitised before first parallel transfer
     rawParallelOverscanBBox : [[0, 1023], [0,      0]]    # parallel overscan
 
-    saturation : 65535                  # saturation level, DN XXX Should this be in electrons?
+    saturation : 30000                  # saturation level, DN XXX Should this be in electrons?
 
     # Linearity correction is still under discussion, so this is a placeholder.
     linearityType : PROPORTIONAL
@@ -111,14 +111,14 @@ CCDs :
              <<: *AMP
              ixy : [0, 0]
              readCorner : LL
-             gain : 3.11
-             readNoise : 12.0
+             gain : 2.87605634848 # from Augustin's rough PTC measurement
+             readNoise : 15       # Augustin says "noise = 5-6 adu"
            "12":
              <<: *A11
              ixy : [0, 1]
              readCorner : UL
-             gain : 3.12
-             readNoise : 6.66
+             gain : 2.7869592662 # from Augustin's rough PTC measurement
+             readNoise : 15       # Augustin says "noise = 5-6 adu"
            "21": &A21
              <<: *AMP
              ixy : [1, 0]
@@ -126,11 +126,11 @@ CCDs :
              rawDataBBox             : [[50,   0], [1024, 1024]]
              rawSerialPrescanBBox    : [[1074, 0], [10,   1024]]
              rawSerialOverscanBBox   : [[0,    0], [50,   1024]]
-             gain : 3.21
-             readNoise : 12.0
+             gain : 2.98712095674 # from Augustin's rough PTC measurement
+             readNoise : 15       # Augustin says "noise = 5-6 adu"
            "22":
              <<: *A21
              readCorner : UR
              ixy : [1, 1]
-             gain : 3.22
-             readNoise : 12.0
+             gain : 2.75790949515 # from Augustin's rough PTC measurement
+             readNoise : 15       # Augustin says "noise = 5-6 adu"

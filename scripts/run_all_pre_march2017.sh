@@ -3,12 +3,13 @@
 #  Data that has been *copied* and then had the headers *patched* by the pre-ingest script
 #  is currently in /nfs/lsst2/photocalData/data/ctio0m9_sanitised
 #  if you rerun the pre-ingest script it will make you another copy
+set -e
 
 export LD_LIBRARY_PATH=$LSST_LIBRARY_PATH
 export DYLD_LIBRARY_PATH=$LSST_LIBRARY_PATH
 
-CTIO_DATA_DIR=/nfs/lsst2/photocalData/data/ctio0m9_sanitised
-REPO_DIR=$HOME/ctio_repo_temp
+CTIO_DATA_DIR=/project/photocalData/data/ctio0m9_sanitised
+REPO_DIR=$HOME/ctio_repo
 whoami=$(whoami)
 batchArgs="--batch-type none"
 
@@ -58,3 +59,7 @@ ingestCalibs.py $REPO_DIR --calibType flat $REPO_DIR/rerun/$whoami/calibs/flat/*
 
 ## Run processCcd on a single visit to make sure it works.
 processCcd.py $REPO_DIR --rerun temp_1 --id visit=242732633
+
+## To rerun all the long, direct visits, uncomment the line below:
+# processCcd.py $REPO_DIR --rerun long_direct_visits @/home/mfl/lsst/obs_ctio0m9/visit_lists/long_direct_visits.txt -j 10 --longlog |& tee ~/logfile.log
+

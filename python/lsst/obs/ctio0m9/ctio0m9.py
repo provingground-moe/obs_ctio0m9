@@ -21,7 +21,7 @@
 #
 import os.path
 import lsst.utils as utils
-from yamlCamera import YamlCamera
+from lsst.obs.base.yamlCamera import YamlCamera
 
 class Ctio0m9(YamlCamera):
     """The Imager on the CTIO 0.9m (ctio0m9)

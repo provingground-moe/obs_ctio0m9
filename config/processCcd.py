@@ -1,6 +1,8 @@
 from lsst.meas.algorithms import LoadIndexedReferenceObjectsTask
 from lsst.meas.astrom import MatchPessimisticBTask
 
+PIXEL_MARGIN = 2000 # to ensure they're linked, as per DM-11356
+
 config.isr.doFlat=False # TODO: change for release/when we have flats
 config.isr.doLinearize=False
 config.isr.doDefect=False # TODO: make defect list and enable
@@ -19,6 +21,7 @@ config.charImage.refObjLoader.ref_dataset_name = "gaia_DR1_v1"
 for refObjLoader in (config.calibrate.astromRefObjLoader,
                      config.calibrate.photoRefObjLoader,
                      config.charImage.refObjLoader):
+    refObjLoader.pixelMargin = PIXEL_MARGIN
     refObjLoader.filterMap = {'RONCHI200+z': 'phot_g_mean_mag',
                               'NONE+SEMROCK': 'phot_g_mean_mag',
                               'NONE+RONCHI200': 'phot_g_mean_mag',
@@ -62,8 +65,8 @@ config.calibrate.astrometry.matcher.sourceSelector['astrometry'].badFlags=[]
 # Carefully tuned for matchPessimisticB; less than 2000 is too little for some visits
 # but more than 2000 has so many sources to match against that it runs _very_ slowly
 # for current dataset, an offset of 2000pix matches all direct visits
-config.calibrate.astrometry.matcher.maxOffsetPix=2000
-config.calibrate.photoCal.matcher.maxOffsetPix=2000
+config.calibrate.astrometry.matcher.maxOffsetPix=PIXEL_MARGIN
+config.calibrate.photoCal.matcher.maxOffsetPix=PIXEL_MARGIN
 config.calibrate.astrometry.wcsFitter.order=2 # prevent overfitting as we don't have many stars
 
 # we don't need these, and sometimes the correction can't be measured - this prevents failure

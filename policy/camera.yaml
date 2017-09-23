@@ -24,7 +24,7 @@
 
 name : "ctio0m9"
 plateScale : 16.0                      # plate scale, in arcseconds on sky/mm
-radialCoeffs : [0.0, 1.0, 0.0, 1.0]     # radial distortion coefficients (c_0 + c_1 r + c_2 r^2 + ...)
+radialCoeffs : [0.0, 1.0]     # radial distortion coefficients (c_0 + c_1 r + c_2 r^2 + ...)
 
 #
 # A single amplifier ("segment" to the camera team)

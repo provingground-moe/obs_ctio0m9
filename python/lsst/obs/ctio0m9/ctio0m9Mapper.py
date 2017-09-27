@@ -32,13 +32,14 @@ import lsst.daf.base as dafBase
 from lsst.obs.ctio0m9 import Ctio0m9
 from lsst.utils import decStrToDeg, raStrToDeg
 
+
 class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
     """functor to make a VisitInfo from the FITS header of a raw image
     """
 
     def setArgDict(self, md, argDict):
         """Fill an argument dict with arguments for makeVisitInfo and pop associated metadata
-        
+
         @param[in] md image metadata
         @param[in, out] md the argument dictionary for modification
         """
@@ -129,7 +130,7 @@ class Ctio0m9Mapper(CameraMapper):
         @param[in] dataId
         """
         md = item.getMetadata()
-        
+
         # Note that setting these must be done before the call to super below
         md.set('CTYPE1', 'RA---TAN') # add missing keywords
         md.set('CTYPE2', 'DEC--TAN') # add missing keywords
@@ -140,7 +141,7 @@ class Ctio0m9Mapper(CameraMapper):
         md.set('CD1_1', -0.000111557869436) # set nominal CD matrix
         md.set('CD1_2', 1.09444409144E-07)
         md.set('CD2_1', 6.26180926869E-09)
-        md.set('CD2_2', -0.000111259259893) 
+        md.set('CD2_2', -0.000111259259893)
 
         item = super(Ctio0m9Mapper, self).std_raw(item, dataId)
         #
@@ -189,7 +190,7 @@ class Ctio0m9Mapper(CameraMapper):
                     #
                     rawPrescanBBox = a.getRawPrescanBBox()
                     rawPrescanBBox.shift(afwGeom.ExtentI(2*(ix - 1)*extraSerialOverscan,
-                                                           (iy - 1)*extraParallelOverscan))
+                                                         (iy - 1)*extraParallelOverscan))
 
                     xy0 = rawPrescanBBox.getMin()
                     xy1 = rawPrescanBBox.getMax()
@@ -211,9 +212,10 @@ class Ctio0m9Mapper(CameraMapper):
             exp.getInfo().setVisitInfo(afwImage.VisitInfo(darkTime=1.0))
         return exp
 
+
 def sanitize_date(md):
     '''Take a metadata object, fix corrupted dates in DATE-OBS field, and return the fixed md object.
-    
+
     We see corrupted dates like "2016-03-06T08:53:3.198" (should be 53:03.198); fix these
     when they make dafBase.DateTime unhappy
 
@@ -231,6 +233,6 @@ def sanitize_date(md):
             TZ = ""
 
         date_obs = "%4d-%02d-%02dT%02d:%02d:%06.3f%s" % (int(year), int(month), int(day),
-                                                         int(h),    int(m),     float(s), TZ)
+                                                         int(h), int(m), float(s), TZ)
     md.set('DATE-OBS', date_obs) # put santized version back
     return md

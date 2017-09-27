@@ -1,3 +1,4 @@
+from __future__ import print_function
 from lsst.meas.algorithms import LoadIndexedReferenceObjectsTask
 from lsst.meas.astrom import MatchPessimisticBTask
 

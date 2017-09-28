@@ -19,6 +19,8 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
+from __future__ import division, print_function
+
 __all__ = ["Ctio0m9Mapper"]
 
 import re

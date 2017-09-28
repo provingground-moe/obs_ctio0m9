@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import division, print_function
 import os
 import re
 import lsst.daf.base as dafBase

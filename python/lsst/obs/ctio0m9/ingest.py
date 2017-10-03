@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import division, print_function
 import os
 import re
 import lsst.daf.base as dafBase
@@ -9,16 +9,18 @@ from lsst.obs.ctio0m9.ctio0m9Mapper import sanitize_date
 
 EXTENSIONS = ["fits", "gz", "fz"]  # Filename extensions to strip off
 
+
 def mjdToVisit(date_obs):
-        """Generate a visit number given a DATE-OBS 
-        
-        @param[in] date_obs a dafBase.DateTime.MJD compliant string
-        @return visit_num visit number generated from date_obs
-        """
-        dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
-        mjd = dt.get(dafBase.DateTime.MJD) # MJD is actually the default
-        mmjd = mjd - 55197              # relative to 2010-01-01, just to make the visits a tiny bit smaller
-        return int(1e5*mmjd)            # 86400s per day, so we need this resolution
+    """Generate a visit number given a DATE-OBS 
+
+    @param[in] date_obs a dafBase.DateTime.MJD compliant string
+    @return visit_num visit number generated from date_obs
+    """
+    dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
+    mjd = dt.get(dafBase.DateTime.MJD) # MJD is actually the default
+    mmjd = mjd - 55197              # relative to 2010-01-01, just to make the visits a tiny bit smaller
+    return int(1e5*mmjd)            # 86400s per day, so we need this resolution
+
 
 class Ctio0m9ParseTask(ParseTask):
     """Parser suitable for ctio0m9 data
@@ -57,7 +59,7 @@ class Ctio0m9ParseTask(ParseTask):
         Get the image type (e.g. bias, dark, flat etc) from the metadata (md).
         Translator function derived from a very small dataset from the observatory
         i.e. may well need adding to when new string values are found
-        
+
         @param[in] md image metadata
         @return The image type, as mapped by the dict in this function
         """
@@ -96,7 +98,7 @@ class Ctio0m9ParseTask(ParseTask):
             wavelength = float(val[0:4])
         elif val[0:3].isdigit():
             wavelength = float(val[0:3])
-            if wavelength<300 or wavelength>1150: #We don't know what might be stored here,
+            if wavelength < 300 or wavelength > 1150: #We don't know what might be stored here,
                                                   #so a little sanity checking is good
                 self.log.warn('Found a wavelength of %s, '
                               'which lies outside of the expected range.', wavelength)
@@ -138,7 +140,6 @@ class Ctio0m9ParseTask(ParseTask):
             self.log.warn('Unmapped filter type %s found when translating filter', val)
             return 'UNKNOWN_FILTER' #avoiding using None, as this is an alias for clear/no_filter
 
-
     def translate_filter(self, md):
         """Generate the standardised composite name of the two filters.
 
@@ -146,7 +147,7 @@ class Ctio0m9ParseTask(ParseTask):
         so that flats can be generated for each filter pair easily. Individual filter
         name sanitisation is done by the _translate_filter() function so it only
         has to be defined in one place.
-        
+
         @param[in] md image metadata
         @return sanitized and concatenated filter name
         """

@@ -1,13 +1,14 @@
+from __future__ import print_function
 from lsst.meas.algorithms import LoadIndexedReferenceObjectsTask
 from lsst.meas.astrom import MatchPessimisticBTask
 
 PIXEL_MARGIN = 2000 # to ensure they're linked, as per DM-11356
 
-config.isr.doFlat=False # TODO: change for release/when we have flats
-config.isr.doLinearize=False
-config.isr.doDefect=False # TODO: make defect list and enable
+config.isr.doFlat = False # TODO: change for release/when we have flats
+config.isr.doLinearize = False
+config.isr.doDefect = False # TODO: make defect list and enable
 
-config.charImage.repair.cosmicray.nCrPixelMax=100000
+config.charImage.repair.cosmicray.nCrPixelMax = 100000
 
 # Retarget all matchers to use Gaia
 config.calibrate.photoRefObjLoader.retarget(LoadIndexedReferenceObjectsTask)
@@ -51,27 +52,27 @@ config.calibrate.astrometry.matcher.retarget(MatchPessimisticBTask)
 config.calibrate.photoCal.matcher.retarget(MatchPessimisticBTask)
 
 # improve threshold values for short exposures on a small telescope
-config.charImage.detection.includeThresholdMultiplier=5.0 #default=10.0
-config.charImage.measurePsf.starSelector['objectSize'].fluxMin=1000.0 # default=12500.0
-config.calibrate.astrometry.matcher.sourceSelector['matcherPessimistic'].minSnr=4.0 # default=40.0
-config.calibrate.photoCal.matcher.sourceSelector['matcherPessimistic'].minSnr=4.0 # default=40.0
+config.charImage.detection.includeThresholdMultiplier = 5.0 #default=10.0
+config.charImage.measurePsf.starSelector['objectSize'].fluxMin = 1000.0 # default=12500.0
+config.calibrate.astrometry.matcher.sourceSelector['matcherPessimistic'].minSnr = 4.0 # default=40.0
+config.calibrate.photoCal.matcher.sourceSelector['matcherPessimistic'].minSnr = 4.0 # default=40.0
 
 # probably don't need these, was to check that no sources were being thrown away due to these
 # TODO: remove these options and rerun all to check if everything still works.
 #       if does, remove these lines.
-config.calibrate.astrometry.matcher.sourceSelector['matcher'].badFlags=[]
-config.calibrate.astrometry.matcher.sourceSelector['astrometry'].badFlags=[]
+config.calibrate.astrometry.matcher.sourceSelector['matcher'].badFlags = []
+config.calibrate.astrometry.matcher.sourceSelector['astrometry'].badFlags = []
 
 # Carefully tuned for matchPessimisticB; less than 2000 is too little for some visits
 # but more than 2000 has so many sources to match against that it runs _very_ slowly
 # for current dataset, an offset of 2000pix matches all direct visits
-config.calibrate.astrometry.matcher.maxOffsetPix=PIXEL_MARGIN
-config.calibrate.photoCal.matcher.maxOffsetPix=PIXEL_MARGIN
-config.calibrate.astrometry.wcsFitter.order=2 # prevent overfitting as we don't have many stars
+config.calibrate.astrometry.matcher.maxOffsetPix = PIXEL_MARGIN
+config.calibrate.photoCal.matcher.maxOffsetPix = PIXEL_MARGIN
+config.calibrate.astrometry.wcsFitter.order = 2 # prevent overfitting as we don't have many stars
 
 # we don't need these, and sometimes the correction can't be measured - this prevents failure
-config.calibrate.doApCorr=False 
-config.charImage.doApCorr=False
+config.calibrate.doApCorr = False
+config.charImage.doApCorr = False
 
 # try to reduce spurious detections around the bright sources
-config.calibrate.detection.doTempLocalBackground=True
+config.calibrate.detection.doTempLocalBackground = True

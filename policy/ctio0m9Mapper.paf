@@ -464,4 +464,7 @@ datasets: {
         tables: raw
         tables: raw_visit
     }
+    apPipe_metadata: {
+        template:      "apPipe_metadata/v%(visit)d_f%(filter)s.boost"
+    }
 }

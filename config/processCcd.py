@@ -55,12 +55,6 @@ config.charImage.detection.includeThresholdMultiplier = 5.0 #default=10.0
 config.charImage.measurePsf.starSelector['objectSize'].fluxMin = 1000.0 # default=12500.0
 config.calibrate.astrometry.matcher.sourceSelector['matcherPessimistic'].minSnr = 4.0 # default=40.0
 
-# probably don't need these, was to check that no sources were being thrown away due to these
-# TODO: remove these options and rerun all to check if everything still works.
-#       if does, remove these lines.
-config.calibrate.astrometry.matcher.sourceSelector['matcher'].badFlags = []
-config.calibrate.astrometry.matcher.sourceSelector['astrometry'].badFlags = []
-
 # Carefully tuned for matchPessimisticB; less than 2000 is too little for some visits
 # but more than 2000 has so many sources to match against that it runs _very_ slowly
 # for current dataset, an offset of 2000pix matches all direct visits

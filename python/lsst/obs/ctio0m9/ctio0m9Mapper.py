@@ -46,7 +46,7 @@ class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
         @param[in, out] md the argument dictionary for modification
         """
         super(Ctio0m9MakeRawVisitInfo, self).setArgDict(md, argDict)
-        argDict["darkTime"] = md.get("DARKTIME")
+        argDict["darkTime"] = md.getScalar("DARKTIME")
 
     def getDateAvg(self, md, exposureTime):
         """Return date at the middle of the exposure
@@ -136,8 +136,8 @@ class Ctio0m9Mapper(CameraMapper):
         # Note that setting these must be done before the call to super below
         md.set('CTYPE1', 'RA---TAN') # add missing keywords
         md.set('CTYPE2', 'DEC--TAN') # add missing keywords
-        md.set('CRVAL2', decStrToDeg(md.get('DEC'))) # translate RA/DEC from header
-        md.set('CRVAL1', raStrToDeg(md.get('RA')))
+        md.set('CRVAL2', decStrToDeg(md.getScalar('DEC'))) # translate RA/DEC from header
+        md.set('CRVAL1', raStrToDeg(md.getScalar('RA')))
         md.set('CRPIX1', 210.216) # set reference pixels
         md.set('CRPIX2', 344.751)
         md.set('CD1_1', -0.000111557869436) # set nominal CD matrix
@@ -154,7 +154,7 @@ class Ctio0m9Mapper(CameraMapper):
         # we need to so so.
         #
         ccd = item.getDetector()
-        rawBBoxFromMetadata = bboxFromIraf(md.get("ASEC11"))
+        rawBBoxFromMetadata = bboxFromIraf(md.getScalar("ASEC11"))
         rawBBox = ccd[0].getRawBBox()
 
         if rawBBoxFromMetadata != rawBBox:
@@ -167,8 +167,8 @@ class Ctio0m9Mapper(CameraMapper):
             for a in ccd:
                 ix, iy = [int(_) for _ in a.getName()]
                 irafName = "%d%d" % (iy, ix)
-                a.setRawBBox(bboxFromIraf(md.get("ASEC%s" % irafName)))
-                a.setRawDataBBox(bboxFromIraf(md.get("TSEC%s" % irafName)))
+                a.setRawBBox(bboxFromIraf(md.getScalar("ASEC%s" % irafName)))
+                a.setRawDataBBox(bboxFromIraf(md.getScalar("TSEC%s" % irafName)))
 
                 if extraSerialOverscan != 0 or extraParallelOverscan != 0:
                     #
@@ -224,7 +224,7 @@ def sanitize_date(md):
     @param md      metadata in, to be fixed
     @return md     metadata returned, with DATE-OBS fixed
     '''
-    date_obs = md.get('DATE-OBS')
+    date_obs = md.getScalar('DATE-OBS')
     try: # see if compliant. Don't use, just a test with dafBase
         dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
     except: #if bad, sanitise

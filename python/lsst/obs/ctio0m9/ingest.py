@@ -51,7 +51,7 @@ class Ctio0m9ParseTask(ParseTask):
 
         @param[in] md image metadata
         """
-        return mjdToVisit(md.get("DATE-OBS"))
+        return mjdToVisit(md.getScalar("DATE-OBS"))
 
     def translate_imgType(self, md):
         """Determine the type of image being taken (bias, dark etc).
@@ -63,7 +63,7 @@ class Ctio0m9ParseTask(ParseTask):
         @param[in] md image metadata
         @return The image type, as mapped by the dict in this function
         """
-        val = md.get("IMAGETYP").rstrip().lstrip()
+        val = md.getScalar("IMAGETYP").rstrip().lstrip()
         conversion = {'dflat': 'flat',
                       'DFLAT': 'flat',
                       'DOME FLAT': 'flat',
@@ -91,7 +91,7 @@ class Ctio0m9ParseTask(ParseTask):
         @param[in] md image metadata
         @return wavelength in nm
         """
-        val = md.get("OBJECT").rstrip().lstrip()
+        val = md.getScalar("OBJECT").rstrip().lstrip()
         if self.translate_imgType(md) != 'flat':
             return float('nan') # defaults to NaN if not a flat
         if val[0:4].isdigit():
@@ -151,8 +151,8 @@ class Ctio0m9ParseTask(ParseTask):
         @param[in] md image metadata
         @return sanitized and concatenated filter name
         """
-        filt1 = self._translate_filter(md.get("FILTER1").rstrip().lstrip())
-        filt2 = self._translate_filter(md.get("FILTER2").rstrip().lstrip())
+        filt1 = self._translate_filter(md.getScalar("FILTER1").rstrip().lstrip())
+        filt2 = self._translate_filter(md.getScalar("FILTER2").rstrip().lstrip())
         sorted_filter = [filt1, filt2]
         sorted_filter.sort() #we want to be insensitive to filter order, for now at least
         filter_name = '+'.join(_ for _ in sorted_filter)
@@ -165,7 +165,7 @@ class Ctio0m9ParseTask(ParseTask):
         @return compliant DATE-OBS string
         """
         md = sanitize_date(md)
-        return md.get('DATE-OBS')
+        return md.getScalar('DATE-OBS')
 
     def translate_filter1(self, md):
         """Standardize the filter naming.
@@ -176,7 +176,7 @@ class Ctio0m9ParseTask(ParseTask):
         @param[in] md image metadata
         @return sanitized filter name
         """
-        val = md.get("FILTER1").rstrip().lstrip()
+        val = md.getScalar("FILTER1").rstrip().lstrip()
         return self._translate_filter(val)
 
     def translate_filter2(self, md):
@@ -188,7 +188,7 @@ class Ctio0m9ParseTask(ParseTask):
         @param[in] md image metadata
         @return sanitized filter name
         """
-        val = md.get("FILTER2").rstrip().lstrip()
+        val = md.getScalar("FILTER2").rstrip().lstrip()
         return self._translate_filter(val)
 
 
@@ -197,7 +197,7 @@ class Ctio0m9CalibsParseTask(CalibsParseTask):
 
     def _translateFromCalibId(self, field, md):
         """Get a value from the CALIB_ID written by constructCalibs"""
-        data = md.get("CALIB_ID")
+        data = md.getScalar("CALIB_ID")
         match = re.search(".*%s=(\S+)" % field, data)
         return match.groups()[0]
 

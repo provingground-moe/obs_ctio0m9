@@ -1,12 +1,17 @@
+"""
+ctio0m9-specific overrides for ProcessCcdTask
+"""
 from __future__ import print_function
+import os.path
 from lsst.meas.algorithms import LoadIndexedReferenceObjectsTask
 from lsst.meas.astrom import MatchPessimisticBTask
+from lsst.utils import getPackageDir
+
+obsConfigDir = os.path.join(getPackageDir("obs_ctio0m9"), "config")
 
 PIXEL_MARGIN = 2000 # to ensure they're linked, as per DM-11356
 
-config.isr.doFlat = False # TODO: change for release/when we have flats
-config.isr.doLinearize = False
-config.isr.doDefect = False # TODO: make defect list and enable
+config.isr.load(os.path.join(obsConfigDir, "isr.py"))
 
 config.charImage.repair.cosmicray.nCrPixelMax = 100000
 

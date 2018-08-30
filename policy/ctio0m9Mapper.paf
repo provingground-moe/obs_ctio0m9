@@ -273,10 +273,10 @@ datasets: {
         tables:        raw
     }
     forced_metadata: {
-        template:      "forced_metadata/v%(visit)d_f%(filter)s.boost"
+        template:      "forced_metadata/v%(visit)d_f%(filter)s.yaml"
         python:        "lsst.daf.base.PropertySet"
         persistable:        "PropertySet"
-        storage:    "BoostStorage"
+        storage:    "YamlStorage"
         tables:        raw
     }
     forced_schema: {
@@ -364,10 +364,10 @@ datasets: {
         tables:        raw
     }
     Mosaic_metadata: {
-        template:      "metadata/Mosaic.boost"
+        template:      "metadata/Mosaic.yaml"
         python:        "lsst.daf.base.PropertySet"
         persistable:        "PropertySet"
-        storage:    "BoostStorage"
+        storage:    "YamlStorage"
         tables:        raw
     }
     processCcd_config: {
@@ -378,10 +378,10 @@ datasets: {
         tables:        raw
     }
     processCcd_metadata: {
-        template:      "processCcd_metadata/v%(visit)d_f%(filter)s.boost"
+        template:      "processCcd_metadata/v%(visit)d_f%(filter)s.yaml"
         python:        "lsst.daf.base.PropertySet"
         persistable:        "PropertySet"
-        storage:    "BoostStorage"
+        storage:    "YamlStorage"
         tables:        raw
     }
     transformSrcMeasurement_config: {
@@ -392,10 +392,10 @@ datasets: {
         tables:        raw
     }
     transformSrcMeasurement_metadata: {
-        template:      "transformSrcMeasurement_metadata/v%(visit)d_f%(filter)s.boost"
+        template:      "transformSrcMeasurement_metadata/v%(visit)d_f%(filter)s.yaml"
         python:        "lsst.daf.base.PropertySet"
         persistable:   "PropertySet"
-        storage:       "BoostStorage"
+        storage:       "YamlStorage"
         tables:        raw
     }
     measureCcd_config: {
@@ -406,10 +406,10 @@ datasets: {
         tables:        raw
     }
     measureCcd_metadata: {
-        template:      "measureCcd_metadata/v%(visit)d_f%(filter)s.boost"
+        template:      "measureCcd_metadata/v%(visit)d_f%(filter)s.yaml"
         python:        "lsst.daf.base.PropertySet"
         persistable:        "PropertySet"
-        storage:    "BoostStorage"
+        storage:    "YamlStorage"
         tables:        raw
     }
     IngestIndexedReferenceTask_config: {
@@ -465,6 +465,6 @@ datasets: {
         tables: raw_visit
     }
     apPipe_metadata: {
-        template:      "apPipe_metadata/v%(visit)d_f%(filter)s.boost"
+        template:      "apPipe_metadata/v%(visit)d_f%(filter)s.yaml"
     }
 }

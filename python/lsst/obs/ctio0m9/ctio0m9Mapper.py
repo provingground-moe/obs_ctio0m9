@@ -21,6 +21,7 @@
 #
 __all__ = ["Ctio0m9Mapper"]
 
+import os
 import re
 
 from astropy.coordinates import Angle
@@ -31,8 +32,8 @@ import lsst.afw.image.utils as afwImageUtils
 import lsst.afw.geom as afwGeom
 import lsst.afw.cameraGeom as cameraGeom
 from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf, exposureFromImage
-import lsst.pex.policy as pexPolicy
 import lsst.daf.base as dafBase
+from lsst.daf.persistence import Policy
 from lsst.obs.ctio0m9 import Ctio0m9
 
 
@@ -70,10 +71,9 @@ class Ctio0m9Mapper(CameraMapper):
     MakeRawVisitInfoClass = Ctio0m9MakeRawVisitInfo
 
     def __init__(self, inputPolicy=None, **kwargs):
-        policyFile = pexPolicy.DefaultPolicyFile(self.packageName, "ctio0m9Mapper.paf", "policy")
-        policy = pexPolicy.Policy(policyFile)
-
-        CameraMapper.__init__(self, policy, policyFile.getRepositoryPath(), **kwargs)
+        policyFile = Policy.defaultPolicyFile(self.packageName, "ctio0m9Mapper.yaml", "policy")
+        policy = Policy(policyFile)
+        CameraMapper.__init__(self, policy, os.path.dirname(policyFile), **kwargs)
         filter_pairings = ['NONE+SEMROCK',  # list of all filter pairings found in data
                            'NONE+RONCHI200',
                            'RONCHI200+SEMROCK',

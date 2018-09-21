@@ -22,6 +22,10 @@
 __all__ = ["Ctio0m9Mapper"]
 
 import re
+
+from astropy.coordinates import Angle
+from astropy import units as u
+
 import lsst.afw.image as afwImage
 import lsst.afw.image.utils as afwImageUtils
 import lsst.afw.geom as afwGeom
@@ -30,7 +34,6 @@ from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf, exposure
 import lsst.pex.policy as pexPolicy
 import lsst.daf.base as dafBase
 from lsst.obs.ctio0m9 import Ctio0m9
-from lsst.utils import decStrToDeg, raStrToDeg
 
 
 class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
@@ -139,8 +142,8 @@ class Ctio0m9Mapper(CameraMapper):
         # Note that setting these must be done before the call to super below
         md.set('CTYPE1', 'RA---TAN')  # add missing keywords
         md.set('CTYPE2', 'DEC--TAN')  # add missing keywords
-        md.set('CRVAL2', decStrToDeg(md.getScalar('DEC')))  # translate RA/DEC from header
-        md.set('CRVAL1', raStrToDeg(md.getScalar('RA')))
+        md.set('CRVAL2', Angle(md.getScalar('DEC'), unit=u.deg).degree)  # translate RA/DEC from header
+        md.set('CRVAL1', Angle(md.getScalar('RA'), unit=u.hour).degree)
         md.set('CRPIX1', 210.216)  # set reference pixels
         md.set('CRPIX2', 344.751)
         md.set('CD1_1', -0.000111557869436)  # set nominal CD matrix

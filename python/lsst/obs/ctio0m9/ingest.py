@@ -11,15 +11,18 @@ EXTENSIONS = ["fits", "gz", "fz"]  # Filename extensions to strip off
 
 
 def mjdToVisit(date_obs):
-    """Generate a visit number given a DATE-OBS 
+    """Generate a visit number given a DATE-OBS
 
     @param[in] date_obs a dafBase.DateTime.MJD compliant string
     @return visit_num visit number generated from date_obs
     """
     dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
-    mjd = dt.get(dafBase.DateTime.MJD) # MJD is actually the default
-    mmjd = mjd - 55197              # relative to 2010-01-01, just to make the visits a tiny bit smaller
-    return int(1e5*mmjd)            # 86400s per day, so we need this resolution
+    # MJD is actually the default
+    mjd = dt.get(dafBase.DateTime.MJD)
+    # relative to 2010-01-01, just to make the visits a tiny bit smaller
+    mmjd = mjd - 55197
+    # 86400s per day, so we need this resolution
+    return int(1e5*mmjd)
 
 
 class Ctio0m9ParseTask(ParseTask):
@@ -29,8 +32,8 @@ class Ctio0m9ParseTask(ParseTask):
     def getInfo(self, filename):
         """Get information about the image from the filename and its contents.
 
-        Here, scrape the basename from the filename, and then call the baseclass to 
-        open the image and parse the header.
+        Here, scrape the basename from the filename, and then call the
+        baseclass to open the image and parse the header.
 
         @param filename    Name of file to inspect
         @return File properties; list of file properties for each extension
@@ -57,8 +60,9 @@ class Ctio0m9ParseTask(ParseTask):
         """Determine the type of image being taken (bias, dark etc).
 
         Get the image type (e.g. bias, dark, flat etc) from the metadata (md).
-        Translator function derived from a very small dataset from the observatory
-        i.e. may well need adding to when new string values are found
+        Translator function derived from a very small dataset from the
+        observatory i.e. may well need adding to when new string values are
+        found.
 
         @param[in] md image metadata
         @return The image type, as mapped by the dict in this function
@@ -93,13 +97,14 @@ class Ctio0m9ParseTask(ParseTask):
         """
         val = md.getScalar("OBJECT").rstrip().lstrip()
         if self.translate_imgType(md) != 'flat':
-            return float('nan') # defaults to NaN if not a flat
+            return float('nan')  # defaults to NaN if not a flat
         if val[0:4].isdigit():
             wavelength = float(val[0:4])
         elif val[0:3].isdigit():
             wavelength = float(val[0:3])
-            if wavelength < 300 or wavelength > 1150: #We don't know what might be stored here,
-                                                  #so a little sanity checking is good
+            # We don't know what might be stored here,
+            # so a little sanity checking is good
+            if wavelength < 300 or wavelength > 1150:
                 self.log.warn('Found a wavelength of %s, '
                               'which lies outside of the expected range.', wavelength)
             return wavelength
@@ -107,7 +112,8 @@ class Ctio0m9ParseTask(ParseTask):
 
     def _translate_filter(self, val):
         """Definition of the filter sanitization mappings.
-        Add values to the dictionary as needed when new values are found in the data"""
+        Add values to the dictionary as needed when new values are found in
+        the data"""
         conversion = {'SEMROCK': 'SEMROCK',
                       'Semrock': 'SEMROCK',
                       'RONCHI400': 'RONCHI400',
@@ -138,15 +144,16 @@ class Ctio0m9ParseTask(ParseTask):
             return conversion[val]
         else:
             self.log.warn('Unmapped filter type %s found when translating filter', val)
-            return 'UNKNOWN_FILTER' #avoiding using None, as this is an alias for clear/no_filter
+            # avoiding using None, as this is an alias for clear/no_filter
+            return 'UNKNOWN_FILTER'
 
     def translate_filter(self, md):
         """Generate the standardised composite name of the two filters.
 
         Map the filters used to a standard name, and concatenate as a string,
-        so that flats can be generated for each filter pair easily. Individual filter
-        name sanitisation is done by the _translate_filter() function so it only
-        has to be defined in one place.
+        so that flats can be generated for each filter pair easily. Individual
+        filter name sanitisation is done by the _translate_filter() function
+        so it only has to be defined in one place.
 
         @param[in] md image metadata
         @return sanitized and concatenated filter name
@@ -154,7 +161,8 @@ class Ctio0m9ParseTask(ParseTask):
         filt1 = self._translate_filter(md.getScalar("FILTER1").rstrip().lstrip())
         filt2 = self._translate_filter(md.getScalar("FILTER2").rstrip().lstrip())
         sorted_filter = [filt1, filt2]
-        sorted_filter.sort() #we want to be insensitive to filter order, for now at least
+        # we want to be insensitive to filter order, for now at least
+        sorted_filter.sort()
         filter_name = '+'.join(_ for _ in sorted_filter)
         return filter_name
 
@@ -170,8 +178,8 @@ class Ctio0m9ParseTask(ParseTask):
     def translate_filter1(self, md):
         """Standardize the filter naming.
 
-        Map the filter used to a standard name for the filter, as defined in the
-        _translate_filter() function.
+        Map the filter used to a standard name for the filter, as defined in
+        the _translate_filter() function.
 
         @param[in] md image metadata
         @return sanitized filter name
@@ -182,8 +190,8 @@ class Ctio0m9ParseTask(ParseTask):
     def translate_filter2(self, md):
         """Standardize the filter naming.
 
-        Map the filter used to a standard name for the filter, as defined in the
-        _translate_filter() function.
+        Map the filter used to a standard name for the filter, as defined in
+        the _translate_filter() function.
 
         @param[in] md image metadata
         @return sanitized filter name

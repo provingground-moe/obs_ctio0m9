@@ -40,7 +40,8 @@ class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
     """
 
     def setArgDict(self, md, argDict):
-        """Fill an argument dict with arguments for makeVisitInfo and pop associated metadata
+        """Fill an argument dict with arguments for makeVisitInfo and pop
+        associated metadata
 
         @param[in] md image metadata
         @param[in, out] md the argument dictionary for modification
@@ -51,9 +52,10 @@ class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
     def getDateAvg(self, md, exposureTime):
         """Return date at the middle of the exposure
 
-        @param[in,out] md  metadata, as an lsst.daf.base.PropertyList or PropertySet;
-            items that are used are stripped from the metadata
-            (except TIMESYS, because it may apply to more than one other keyword).
+        @param[in,out] md  metadata, as an lsst.daf.base.PropertyList or
+            PropertySet; items that are used are stripped from the metadata
+            (except TIMESYS, because it may apply to more than one other
+            keyword).
         @param[in] exposureTime  exposure time (sec)
         """
         dateObs = self.popIsoDate(md, "DATE-OBS")
@@ -71,7 +73,7 @@ class Ctio0m9Mapper(CameraMapper):
         policy = pexPolicy.Policy(policyFile)
 
         CameraMapper.__init__(self, policy, policyFile.getRepositoryPath(), **kwargs)
-        filter_pairings = ['NONE+SEMROCK', # list of all filter pairings found in data
+        filter_pairings = ['NONE+SEMROCK',  # list of all filter pairings found in data
                            'NONE+RONCHI200',
                            'RONCHI200+SEMROCK',
                            'NONE+NONE',
@@ -93,7 +95,8 @@ class Ctio0m9Mapper(CameraMapper):
             afwImageUtils.defineFilter(pairing, 0.0, alias=[])
 
     def _makeCamera(self, policy, repositoryDir):
-        """Make a camera (instance of lsst.afw.cameraGeom.Camera) describing the camera geometry
+        """Make a camera (instance of lsst.afw.cameraGeom.Camera) describing
+        the camera geometry
         """
         return Ctio0m9()
 
@@ -119,7 +122,8 @@ class Ctio0m9Mapper(CameraMapper):
     def std_raw_md(self, md, dataId):
         """Method for performing any necessary sanitization of metadata.
 
-        @param[in,out] md metadata, as an lsst.daf.base.PropertyList or PropertySet, to be sanitized
+        @param[in,out] md metadata, as an lsst.daf.base.PropertyList or
+                          PropertySet, to be sanitized
         @param[in] dataId unused
         """
         md = sanitize_date(md)
@@ -128,19 +132,20 @@ class Ctio0m9Mapper(CameraMapper):
     def std_raw(self, item, dataId):
         """Method for performing any necessary manipulation of the raw files.
 
-        @param[in,out] item afwImage exposure object with associated metadata and detector info
+        @param[in,out] item afwImage exposure object with associated metadata
+                            and detector info
         @param[in] dataId
         """
         md = item.getMetadata()
 
         # Note that setting these must be done before the call to super below
-        md.set('CTYPE1', 'RA---TAN') # add missing keywords
-        md.set('CTYPE2', 'DEC--TAN') # add missing keywords
-        md.set('CRVAL2', decStrToDeg(md.getScalar('DEC'))) # translate RA/DEC from header
+        md.set('CTYPE1', 'RA---TAN')  # add missing keywords
+        md.set('CTYPE2', 'DEC--TAN')  # add missing keywords
+        md.set('CRVAL2', decStrToDeg(md.getScalar('DEC')))  # translate RA/DEC from header
         md.set('CRVAL1', raStrToDeg(md.getScalar('RA')))
-        md.set('CRPIX1', 210.216) # set reference pixels
+        md.set('CRPIX1', 210.216)  # set reference pixels
         md.set('CRPIX2', 344.751)
-        md.set('CD1_1', -0.000111557869436) # set nominal CD matrix
+        md.set('CD1_1', -0.000111557869436)  # set nominal CD matrix
         md.set('CD1_2', 1.09444409144E-07)
         md.set('CD2_1', 6.26180926869E-09)
         md.set('CD2_2', -0.000111259259893)
@@ -149,17 +154,18 @@ class Ctio0m9Mapper(CameraMapper):
         #
         # We may need to hack up the cameraGeom
         #
-        # There doesn't seem to be a way to get the extended register, so I don't update it.
-        # We could do this by detecting extra overscan and adjusting things cleverly; probably
-        # we need to so so.
+        # There doesn't seem to be a way to get the extended register, so I
+        # don't update it.
+        # We could do this by detecting extra overscan and adjusting things
+        # cleverly; probably  we need to so so.
         #
         ccd = item.getDetector()
         rawBBoxFromMetadata = bboxFromIraf(md.getScalar("ASEC11"))
         rawBBox = ccd[0].getRawBBox()
 
         if rawBBoxFromMetadata != rawBBox:
-            extraSerialOverscan = rawBBoxFromMetadata.getWidth() - rawBBox.getWidth() # extra overscan pixels
-            extraParallelOverscan = rawBBoxFromMetadata.getHeight() - rawBBox.getHeight() # vertical
+            extraSerialOverscan = rawBBoxFromMetadata.getWidth() - rawBBox.getWidth()  # extra overscan pixels
+            extraParallelOverscan = rawBBoxFromMetadata.getHeight() - rawBBox.getHeight()  # vertical
 
             ccd = cameraGeom.copyDetector(ccd, ampInfoCatalog=ccd.getAmpInfoCatalog().copy(deep=True))
             item.setDetector(ccd)
@@ -188,7 +194,8 @@ class Ctio0m9Mapper(CameraMapper):
 
                     a.setRawHorizontalOverscanBBox(afwGeom.BoxI(xy0, xy1))
                     #
-                    # And now move the extended register to allow for the extra overscan pixels
+                    # And now move the extended register to allow for the extra
+                    # overscan pixels
                     #
                     rawPrescanBBox = a.getRawPrescanBBox()
                     rawPrescanBBox.shift(afwGeom.ExtentI(2*(ix - 1)*extraSerialOverscan,
@@ -203,31 +210,34 @@ class Ctio0m9Mapper(CameraMapper):
         return item
 
     def std_dark(self, item, dataId):
-        """Standardiation of master dark frame. Must only be called on master darks.
+        """Standardiation of master dark frame. Must only be called on master
+        darks.
 
         @param[in,out] item the master dark, as an image-like object
         @param[in] dataId unused
         """
         exp = exposureFromImage(item)
         if not exp.getInfo().hasVisitInfo():
-            # hard-coded, but pipe_drivers always(?) normalises darks to a darktime of 1s so this is OK?
+            # hard-coded, but pipe_drivers always(?) normalises darks to a
+            # darktime of 1s so this is OK?
             exp.getInfo().setVisitInfo(afwImage.VisitInfo(darkTime=1.0))
         return exp
 
 
 def sanitize_date(md):
-    '''Take a metadata object, fix corrupted dates in DATE-OBS field, and return the fixed md object.
+    '''Take a metadata object, fix corrupted dates in DATE-OBS field, and
+    return the fixed md object.
 
-    We see corrupted dates like "2016-03-06T08:53:3.198" (should be 53:03.198); fix these
-    when they make dafBase.DateTime unhappy
+    We see corrupted dates like "2016-03-06T08:53:3.198" (should be 53:03.198);
+    fix these when they make dafBase.DateTime unhappy
 
     @param md      metadata in, to be fixed
     @return md     metadata returned, with DATE-OBS fixed
     '''
     date_obs = md.getScalar('DATE-OBS')
-    try: # see if compliant. Don't use, just a test with dafBase
-        dt = dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
-    except: #if bad, sanitise
+    try:  # see if compliant. Don't use, just a test with dafBase
+        dafBase.DateTime(date_obs, dafBase.DateTime.TAI)
+    except Exception:  # if bad, sanitise
         year, month, day, h, m, s = re.split(r"[-:T]", date_obs)
         if re.search(r"[A-Z]$", s):
             s, TZ = s[:-1], s[-1]
@@ -236,5 +246,5 @@ def sanitize_date(md):
 
         date_obs = "%4d-%02d-%02dT%02d:%02d:%06.3f%s" % (int(year), int(month), int(day),
                                                          int(h), int(m), float(s), TZ)
-    md.set('DATE-OBS', date_obs) # put santized version back
+    md.set('DATE-OBS', date_obs)  # put santized version back
     return md

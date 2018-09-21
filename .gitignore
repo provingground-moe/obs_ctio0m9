@@ -6,3 +6,6 @@ ups/*.cfgc
 python/lsst/obs/ctio0m9/version.py
 examples/.ipynb_checkpoints/*
 _build.*
+tests/.tests
+.pytest_cache
+.coverage

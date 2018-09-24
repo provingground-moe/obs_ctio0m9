@@ -1,7 +1,6 @@
 """
 ctio0m9-specific overrides for ProcessCcdTask
 """
-from __future__ import print_function
 import os.path
 from lsst.meas.algorithms import LoadIndexedReferenceObjectsTask
 from lsst.meas.astrom import MatchPessimisticBTask

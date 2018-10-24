@@ -205,7 +205,7 @@ class Ctio0m9CalibsParseTask(CalibsParseTask):
     def _translateFromCalibId(self, field, md):
         """Get a value from the CALIB_ID written by constructCalibs"""
         data = md.getScalar("CALIB_ID")
-        match = re.search(".*%s=(\S+)" % field, data)
+        match = re.search(r".*%s=(\S+)" % field, data)
         return match.groups()[0]
 
     def translate_filter(self, md):

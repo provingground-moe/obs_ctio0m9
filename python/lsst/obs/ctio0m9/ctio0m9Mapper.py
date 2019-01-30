@@ -34,7 +34,7 @@ import lsst.afw.cameraGeom as cameraGeom
 from lsst.obs.base import CameraMapper, MakeRawVisitInfo, bboxFromIraf, exposureFromImage
 import lsst.daf.base as dafBase
 from lsst.daf.persistence import Policy
-from lsst.obs.ctio0m9 import Ctio0m9
+from lsst.obs.ctio0m9 import makeCamera
 
 
 class Ctio0m9MakeRawVisitInfo(MakeRawVisitInfo):
@@ -99,7 +99,7 @@ class Ctio0m9Mapper(CameraMapper):
         """Make a camera (instance of lsst.afw.cameraGeom.Camera) describing
         the camera geometry
         """
-        return Ctio0m9()
+        return makeCamera()
 
     def _extractDetectorName(self, dataId):
         return 'SITE2K'

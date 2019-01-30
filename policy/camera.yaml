@@ -24,7 +24,17 @@
 
 name : "ctio0m9"
 plateScale : 16.0                      # plate scale, in arcseconds on sky/mm
-radialCoeffs : [0.0, 1.0]     # radial distortion coefficients (c_0 + c_1 r + c_2 r^2 + ...)
+#
+# Specify the geometrical transformations relavant to the camera in all appropriate
+# (and known!) coordinate systems
+#
+transforms : {
+  'nativeSys': 'FocalPlane',
+  'FieldAngle': {
+    'transformType': 'radial',
+    'coeffs': [0.0, 1.0]
+  }
+}
 
 #
 # A single amplifier ("segment" to the camera team)

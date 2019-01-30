@@ -21,18 +21,15 @@
 #
 import os.path
 import lsst.utils as utils
-from lsst.obs.base.yamlCamera import YamlCamera
+import lsst.obs.base.yamlCamera as yamlCamera
 
 
-class Ctio0m9(YamlCamera):
-    """The Imager on the CTIO 0.9m (ctio0m9)
+def makeCamera(cameraYamlFile=None):
+    """Make a camera for imager on the CTIO 0.9m (ctio0m9)
     """
     packageName = 'obs_ctio0m9'
 
-    def __init__(self, cameraYamlFile=None):
-        """Construct ctio0m9
-        """
-        if not cameraYamlFile:
-            cameraYamlFile = os.path.join(utils.getPackageDir(self.packageName), "policy", "camera.yaml")
+    if not cameraYamlFile:
+        cameraYamlFile = os.path.join(utils.getPackageDir(packageName), "policy", "camera.yaml")
 
-        YamlCamera.__init__(self, cameraYamlFile)
+    return yamlCamera.makeCamera(cameraYamlFile)

@@ -2,7 +2,6 @@
 ctio0m9-specific overrides for ProcessCcdTask
 """
 import os.path
-from lsst.meas.algorithms import LoadIndexedReferenceObjectsTask
 from lsst.meas.astrom import MatchPessimisticBTask
 from lsst.utils import getPackageDir
 
@@ -15,11 +14,8 @@ config.isr.load(os.path.join(obsConfigDir, "isr.py"))
 config.charImage.repair.cosmicray.nCrPixelMax = 100000
 
 # Retarget all matchers to use Gaia
-config.calibrate.photoRefObjLoader.retarget(LoadIndexedReferenceObjectsTask)
 config.calibrate.photoRefObjLoader.ref_dataset_name = "gaia_DR1_v1"
-config.calibrate.astromRefObjLoader.retarget(LoadIndexedReferenceObjectsTask)
 config.calibrate.astromRefObjLoader.ref_dataset_name = "gaia_DR1_v1"
-config.charImage.refObjLoader.retarget(LoadIndexedReferenceObjectsTask)
 config.charImage.refObjLoader.ref_dataset_name = "gaia_DR1_v1"
 
 # Create a filterMap for all known filters to the one Gaia "filter"

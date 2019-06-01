@@ -59,7 +59,6 @@ config.calibrate.astrometry.sourceSelector['matcher'].minSnr = 4.0 # default=40.
 # but more than 2000 has so many sources to match against that it runs _very_ slowly
 # for current dataset, an offset of 2000pix matches all direct visits
 config.calibrate.astrometry.matcher.maxOffsetPix = PIXEL_MARGIN
-config.calibrate.astrometry.wcsFitter.order = 2 # prevent overfitting as we don't have many stars
 
 # we don't need these, and sometimes the correction can't be measured - this prevents failure
 config.calibrate.doApCorr = False

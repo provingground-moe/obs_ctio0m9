@@ -138,7 +138,21 @@ class Ctio0m9ParseTask(ParseTask):
                       'z': 'z',
                       'nv': 'nv',
                       'b': 'b',
+                      'cb': 'cb',
+                      'RG715': 'RG715',
+                      'f5025/1023': 'f5025/1023',
+                      'Halfa': 'Halfa',
+                      'ZG': 'ZG',
+                      'FREE': 'NONE',
+                      'free': 'NONE',
+                      'Thor300': 'Thor300',
+                      'Ron200': 'RONCHI200',
+                      'Ron400': 'RONCHI400',
+                      'HoloPhP': 'HoloPhP',
+                      'HoloAmAg': 'HoloAmAg',
+                      'HoloPhAg': 'HoloPhAg',
                       }
+
         if val in conversion:
             return conversion[val]
         else:
